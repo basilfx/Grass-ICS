@@ -16,33 +16,44 @@
 
 package com.den.wallpaper.grass;
 
-import android.renderscript.Sampler;
-import static android.renderscript.ProgramStore.DepthFunc.*;
-import static android.renderscript.ProgramStore.BlendSrcFunc;
-import static android.renderscript.ProgramStore.BlendDstFunc;
-import android.renderscript.*;
-import static android.renderscript.Element.*;
-import static com.den.wallpaper.MathUtils.*;
-import android.renderscript.Mesh.Primitive;
-import static android.renderscript.Sampler.Value.*;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.content.Intent;
+import static android.renderscript.Element.A_8;
+import static android.renderscript.ProgramStore.DepthFunc.ALWAYS;
+import static android.renderscript.Sampler.Value.LINEAR;
+import static android.renderscript.Sampler.Value.LINEAR_MIP_LINEAR;
+import static android.renderscript.Sampler.Value.NEAREST;
+import static android.renderscript.Sampler.Value.WRAP;
+
+import java.util.Calendar;
+import java.util.Random;
+import java.util.TimeZone;
 import android.content.BroadcastReceiver;
-import android.location.LocationManager;
-import android.location.LocationListener;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.renderscript.Allocation;
+import android.renderscript.AllocationAdapter;
+import android.renderscript.Element;
+import android.renderscript.Matrix4f;
+import android.renderscript.Mesh;
+import android.renderscript.Mesh.Primitive;
+import android.renderscript.ProgramFragment;
+import android.renderscript.ProgramFragmentFixedFunction;
+import android.renderscript.ProgramStore;
+import android.renderscript.ProgramStore.BlendDstFunc;
+import android.renderscript.ProgramStore.BlendSrcFunc;
+import android.renderscript.ProgramVertex;
+import android.renderscript.ProgramVertexFixedFunction;
+import android.renderscript.Sampler;
+import android.renderscript.ScriptC;
+import android.renderscript.Type;
 import android.text.format.Time;
 
-import com.den.wallpaper.grass.ScriptC_grass;
-import com.den.wallpaper.grass.ScriptField_Blade;
-import com.den.wallpaper.grass.ScriptField_Vertex;
 import com.den.wallpaper.R;
 import com.den.wallpaper.RenderScriptScene;
-
-import java.util.TimeZone;
-import java.util.Calendar;
 
 class GrassRS extends RenderScriptScene {
     private static final boolean DEBUG = false;
@@ -52,6 +63,8 @@ class GrassRS extends RenderScriptScene {
     private static final float TESSELATION = 0.5f;
     private static final int BLADES_COUNT = 200;
 
+    private Random randomEngine = new Random();
+    
     private ScriptField_Blade mBlades;
     private ScriptField_Vertex mVertexBuffer;
     private ProgramVertexFixedFunction.Constants mPvOrthoAlloc;
@@ -226,22 +239,22 @@ class GrassRS extends RenderScriptScene {
     }
 
     private void createBlade(ScriptField_Blade.Item blades) {
-        final float size = random(4.0f) + 4.0f;
-        final int xpos = random(-mWidth, mWidth);
+        final float size = this.randomEngine.nextFloat() * 4.0f + 4.0f;
+        final int xpos = (int) (randomEngine.nextFloat() * (mWidth + mWidth) - mWidth);
 
         //noinspection PointlessArithmeticExpression
         blades.angle = 0.0f;
         blades.size = (int)(size / TESSELATION);
         blades.xPos = xpos;
         blades.yPos = mHeight;
-        blades.offset = random(0.2f) - 0.1f;
-        blades.scale = 4.0f / (size / TESSELATION) + (random(0.6f) + 0.2f) * TESSELATION;
-        blades.lengthX = (random(4.5f) + 3.0f) * TESSELATION * size;
-        blades.lengthY = (random(5.5f) + 2.0f) * TESSELATION * size;
-        blades.hardness = (random(1.0f) + 0.2f) * TESSELATION;
-        blades.h = random(0.02f) + 0.2f;
-        blades.s = random(0.22f) + 0.78f;
-        blades.b = random(0.65f) + 0.35f;
+        blades.offset = randomEngine.nextFloat() * 0.2f - 0.1f;
+        blades.scale = 4.0f / (size / TESSELATION) + (this.randomEngine.nextFloat() *0.6f + 0.2f) * TESSELATION;
+        blades.lengthX = (randomEngine.nextFloat() * 4.5f + 3.0f) * TESSELATION * size;
+        blades.lengthY = (randomEngine.nextFloat() * 5.5f + 2.0f) * TESSELATION * size;
+        blades.hardness = (randomEngine.nextFloat() * 1.0f + 0.2f) * TESSELATION;
+        blades.h = randomEngine.nextFloat() * 0.02f + 0.2f;
+        blades.s = randomEngine.nextFloat() * 0.22f + 0.78f;
+        blades.b = randomEngine.nextFloat() * 0.65f + 0.35f;
         blades.turbulencex = xpos * 0.006f;
     }
 
